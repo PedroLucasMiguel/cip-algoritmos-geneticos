@@ -1,16 +1,16 @@
-from population import Population
-from member import Member
-from matplotlib import pyplot as plt
+from .population import Population
+from .member import Member
 import numpy as np
 
 class GeneticAlgorithm:
     def __init__(self, population:Population = None, 
                  evaluation_method = None,
-                 crossover_probability:float = 0.8,
+                 crossover_probability:float = 0.6,
                  mutation_probability:float = 0.02,
                  max_generations:int = 1000,
                  fitness_tolerance:int = 900,
-                 expected_value = None) -> None:
+                 expected_value = None,
+                 maximize:bool = False) -> None:
         
         # FIXME - Implementar verificação dos parâmetros
         self.__population = population
@@ -20,6 +20,7 @@ class GeneticAlgorithm:
         self.__mg = max_generations
         self.__ftt = fitness_tolerance
         self.__exv = expected_value
+        self.__maximize = maximize
 
         self.__fitness = None
         pass
@@ -115,27 +116,6 @@ class GeneticAlgorithm:
                     m["Member"].mutate_at(i)
 
     def start(self) -> Member:
-        '''
-        # DEBUG
-        self.__calculate_population_degrees()
-        print("------------------------------------Population before------------------------------------")
-        for m in self.__population.get_population():
-            print(m["Member"].get_bitstring())
-        print("------------------------------------------------------------------------")
-        couples = self.__roullete_selection()
-        print("Couples: {}".format(couples))
-        self.__crossover(couples)
-        print("------------------------------------Population after------------------------------------")
-        for m in self.__population.get_population():
-            print(m["Member"].get_bitstring())
-        print("------------------------------------------------------------------------")
-        self.__mutate()
-        print("------------------------------------Population after mutation------------------------------------")
-        for m in self.__population.get_population():
-            print(m["Member"].get_bitstring())
-        print("------------------------------------------------------------------------")
-        '''
-
         fitnessStrikes = 0 # Quantidade de gerações que não melhoraram o fitness value
         generation = 1
 
@@ -168,10 +148,16 @@ class GeneticAlgorithm:
 
             # Verifica se a aptidão média da população melhorou ou não
             temp_fitness = self.__evaluate_population()
-            if temp_fitness < self.__fitness:
-                self.__fitness = temp_fitness
+            if self.__maximize:
+                if temp_fitness > self.__fitness:
+                    self.__fitness = temp_fitness
+                else:
+                    fitnessStrikes += 1
             else:
-                fitnessStrikes += 1
+                if temp_fitness < self.__fitness:
+                    self.__fitness = temp_fitness
+                else:
+                    fitnessStrikes += 1
 
             # Soma 1 no contador de gerações
             generation += 1
@@ -183,41 +169,23 @@ class GeneticAlgorithm:
         elif converged == True:
             print("Fim do processo: Convergência alcançada!")
 
-        best_member = None
-        best_fitness = 16
-        for m in self.__population.get_population():
-            if m["Fitness"] < best_fitness:
-                best_fitness = m["Fitness"]
-                best_member = m
+        population = self.__population.get_population()
+        best_member = population[0]
+        best_fitness = population[0]["Fitness"]
+
+        if self.__maximize:
+            for m in self.__population.get_population():
+                if m["Fitness"] > best_fitness:
+                    best_fitness = m["Fitness"]
+                    best_member = m
+        else:
+            for m in self.__population.get_population():
+                if m["Fitness"] < best_fitness:
+                    best_fitness = m["Fitness"]
+                    best_member = m
 
         print("Geração: {}".format(generation))
         print("Melhor Membro: {}".format(best_member))
         print("Bitstring: {}".format(best_member["Member"].get_bitstring()))
 
         return best_member
-
-def evaluator(value) -> float:
-
-    expected = np.array([
-        [True, True, True],
-        [True, False, True],
-        [True, False, True],
-        [True, True, True]
-    ])
-
-    value = value.reshape(expected.shape)
-
-    hamming_distance = 0
-    for i in range(expected.shape[0]):
-        for j in range(expected.shape[1]):
-            if value[i][j] != expected[i][j]:
-                hamming_distance += 1
-
-    return hamming_distance
-
-if __name__ == "__main__":
-    a = GeneticAlgorithm(Population(), evaluator, expected_value=0).start()
-    img = a["Member"].get_bitstring()
-    img = img.reshape((4,3))
-    plt.imshow(img)
-    plt.show()

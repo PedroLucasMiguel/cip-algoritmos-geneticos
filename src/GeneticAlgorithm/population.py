@@ -1,4 +1,4 @@
-from member import Member
+from .member import Member
 
 class Population:
     def __init__(self, nmembers:int = 8, bitstringsize:int = 12, predefined = None) -> None:
