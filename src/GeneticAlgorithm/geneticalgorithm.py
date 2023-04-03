@@ -1,5 +1,6 @@
 from population import Population
 from member import Member
+from matplotlib import pyplot as plt
 import numpy as np
 
 class GeneticAlgorithm:
@@ -7,8 +8,9 @@ class GeneticAlgorithm:
                  evaluation_method = None,
                  crossover_probability:float = 0.6,
                  mutation_probability:float = 0.02,
-                 max_generations:int = 100,
-                 fitness_tolerance:int = 3) -> None:
+                 max_generations:int = 1000,
+                 fitness_tolerance:int = 900,
+                 expected_value = None) -> None:
         
         # TODO - Implement checks to avoid some dumb parameters :D
         self.__population = population
@@ -17,6 +19,7 @@ class GeneticAlgorithm:
         self.__mp = mutation_probability
         self.__mg = max_generations
         self.__ftt = fitness_tolerance
+        self.__exv = expected_value
 
         self.__fitness = None
         pass
@@ -24,6 +27,22 @@ class GeneticAlgorithm:
     def __evaluate_population_members(self):
         for m in self.__population.get_population():
            m["Fitness"] = self.__evaluator(m["Member"].get_bitstring())
+
+    def __evaluate_population(self) -> float:
+        population_sum_fitness = 0
+
+        population = self.__population.get_population()
+
+        for m in population:
+            population_sum_fitness += m["Fitness"]
+
+        return population_sum_fitness/len(population)
+
+    def __check_convergence(self) -> bool:
+        for m in self.__population.get_population():
+            if m["Fitness"] == self.__exv:
+                return True
+        return False
 
     def __calculate_population_degrees(self):
 
@@ -38,10 +57,11 @@ class GeneticAlgorithm:
         m_before = None
         for m in population:
             if m_before != None:
-                m["RoulleteDegrees"] = list(range(m_before["RoulleteDegrees"][-1] + 1, ((m_before["RoulleteDegrees"][-1] + 1) + np.floor((m["Fitness"] * 360)/fitness_sum).astype(int)) + 1))
+                m["RoulleteDegrees"] = (m_before["RoulleteDegrees"][-1] + 1, ((m_before["RoulleteDegrees"][-1] + 1) + np.floor((m["Fitness"] * 360)/fitness_sum).astype(int)) + 1)
             else:
-                m["RoulleteDegrees"] = list(range(0, np.floor((m["Fitness"] * 360)/fitness_sum).astype(int)+1))
+                m["RoulleteDegrees"] = (0, np.floor((m["Fitness"] * 360)/fitness_sum).astype(int)+1)
             m_before = m
+            
 
     def __roullete_selection(self):
 
@@ -52,12 +72,9 @@ class GeneticAlgorithm:
         for i in range(len(population)):
             rn = np.random.randint(low=1, high=361)
             for m in range(len(population)):
-                try:
-                    population[m]["RoulleteDegrees"].index(rn)
+                if rn >= population[m]["RoulleteDegrees"][0] and rn <= population[m]["RoulleteDegrees"][1]: 
                     selected_indexes.append(m)
                     break
-                except ValueError:
-                    continue
 
         return selected_indexes
     
@@ -68,9 +85,7 @@ class GeneticAlgorithm:
 
         for i in range(int(len(couples)/2)):
             if np.random.random() < self.__cp:
-                print("Doing crossover with couple: [{}, {}]".format(couples[(i*2)], couples[(i*2)+1]))
                 cutPoint = np.random.randint(low=0, high=self.__population.get_population_bitstring_size())
-                print("Cut point: {}".format(cutPoint))
                 children1BitString = population[i*2]["Member"].get_bitstring().copy()
                 children1BitString[cutPoint:] = population[(i*2)+1]["Member"].get_bitstring()[cutPoint:]
 
@@ -93,15 +108,16 @@ class GeneticAlgorithm:
 
         self.__population = Population(predefined=new_population_array)
 
+    def __mutate(self):
+        for m in self.__population.get_population():
+            for i in range(len(m["Member"].get_bitstring())):
+                if np.random.random() < self.__mp:
+                    m["Member"].mutate_at(i)
 
     def start(self) -> Member:
-
-        self.__evaluate_population_members()
-
+        '''
         # DEBUG
         self.__calculate_population_degrees()
-
-
         print("------------------------------------Population before------------------------------------")
         for m in self.__population.get_population():
             print(m["Member"].get_bitstring())
@@ -113,37 +129,95 @@ class GeneticAlgorithm:
         for m in self.__population.get_population():
             print(m["Member"].get_bitstring())
         print("------------------------------------------------------------------------")
-
+        self.__mutate()
+        print("------------------------------------Population after mutation------------------------------------")
+        for m in self.__population.get_population():
+            print(m["Member"].get_bitstring())
+        print("------------------------------------------------------------------------")
+        '''
 
         fitnessStrikes = 0 # Quantidade de gerações que não melhoraram o fitness value
-        converged = False
         generation = 1
 
-        
+        self.__evaluate_population_members() # Avalia cada membro individualmente
+
+        # Verifica convergencia se necessário
+        converged = self.__check_convergence() if self.__exv is not None else False
+
+        self.__fitness = self.__evaluate_population() # Define o valor médio de aptidão da população
 
         # Execute o algoritmo enquanto:
         # - Não atingirmos o máximo de gerações
         # - Não passarmos do limite máximo de "strikes" no nosso valor de aptidão
         # - Não convergirmos na melhor resposta
-        #while generation != self.__mg and fitnessStrikes != self.__ftt and not converged:
-        #    self.__calculate_population_degrees()
-        #    pass
+        while generation != self.__mg and fitnessStrikes != self.__ftt and not converged:
+            self.__calculate_population_degrees()
 
+            # Seleção
+            couples = self.__roullete_selection()
 
-        return None
+            # Reprodução
+            self.__crossover(couples)
+            self.__mutate()
+
+            # Avalia a aptidão de cada um individualmente
+            self.__evaluate_population_members()
+
+            # Checa convergência caso necessário
+            converged = self.__check_convergence() if self.__exv is not None else False
+
+            # Verifica se a aptidão média da população melhorou ou não
+            temp_fitness = self.__evaluate_population()
+            if temp_fitness < self.__fitness:
+                self.__fitness = temp_fitness
+            else:
+                fitnessStrikes += 1
+
+            # Soma 1 no contador de gerações
+            generation += 1
+        
+        if generation == self.__mg:
+            print("Fim do processo: Máximo de gerações alcançado")
+        elif fitnessStrikes == self.__ftt:
+            print("Fim do processo: População parou de se tornar mais apta")
+        elif converged == True:
+            print("Fim do processo: Convergência alcançada!")
+
+        best_member = None
+        best_fitness = 16
+        for m in self.__population.get_population():
+            if m["Fitness"] < best_fitness:
+                best_fitness = m["Fitness"]
+                best_member = m
+
+        print("Geração: {}".format(generation))
+        print("Melhor Membro: {}".format(best_member))
+        print("Bitstring: {}".format(best_member["Member"].get_bitstring()))
+
+        return best_member
 
 def evaluator(value) -> float:
 
     expected = np.array([
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 0, 1],
-        [1, 1, 1]
+        [True, True, True],
+        [True, False, True],
+        [True, False, True],
+        [True, True, True]
     ])
 
     value = value.reshape(expected.shape)
 
-    return np.mean(np.isclose(value, expected))
+    hamming_distance = 0
+    for i in range(expected.shape[0]):
+        for j in range(expected.shape[1]):
+            if value[i][j] != expected[i][j]:
+                hamming_distance += 1
+
+    return hamming_distance
 
 if __name__ == "__main__":
-    GeneticAlgorithm(Population(), evaluator).start()
+    a = GeneticAlgorithm(Population(), evaluator, expected_value=0).start()
+    img = a["Member"].get_bitstring()
+    img = img.reshape((4,3))
+    plt.imshow(img)
+    plt.show()

@@ -13,3 +13,6 @@ class Member:
 
     def get_bitstring(self):
         return self.__bitstring
+    
+    def mutate_at(self, index:int):
+        self.__bitstring[index] = not self.__bitstring[index]
