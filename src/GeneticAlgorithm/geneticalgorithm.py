@@ -6,13 +6,13 @@ import numpy as np
 class GeneticAlgorithm:
     def __init__(self, population:Population = None, 
                  evaluation_method = None,
-                 crossover_probability:float = 0.6,
+                 crossover_probability:float = 0.8,
                  mutation_probability:float = 0.02,
                  max_generations:int = 1000,
                  fitness_tolerance:int = 900,
                  expected_value = None) -> None:
         
-        # TODO - Implement checks to avoid some dumb parameters :D
+        # FIXME - Implementar verificação dos parâmetros
         self.__population = population
         self.__evaluator = evaluation_method
         self.__cp = crossover_probability
@@ -53,7 +53,7 @@ class GeneticAlgorithm:
         for m in population:
             fitness_sum += m["Fitness"]
 
-        # TODO - Por algum motivo podemos ter números acima de 360????
+        # FIXME - Por algum motivo podemos ter números acima de 360????
         m_before = None
         for m in population:
             if m_before != None:
