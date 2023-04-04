@@ -1,14 +1,15 @@
 from .population import Population
 from .member import Member
 import numpy as np
+from typing import List
 
 class GeneticAlgorithm:
     def __init__(self, population:Population = None, 
                  evaluation_method = None,
                  crossover_probability:float = 0.6,
                  mutation_probability:float = 0.02,
-                 max_generations:int = 1000,
-                 fitness_tolerance:int = 900,
+                 max_generations:int = 4000,
+                 fitness_tolerance:int = 3000,
                  expected_value:float = None,
                  maximize:bool = False) -> None:
         
@@ -64,7 +65,7 @@ class GeneticAlgorithm:
             m_before = m
             
 
-    def __roullete_selection(self) -> list:
+    def __roullete_selection(self) -> List:
 
         selected_indexes = []
 
