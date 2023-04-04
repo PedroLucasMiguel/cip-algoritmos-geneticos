@@ -1,12 +1,13 @@
 from .member import Member
+from typing import List
 
 class Population:
-    def __init__(self, nmembers:int = 8, bitstringsize:int = 12, predefined = None) -> None:
+    def __init__(self, nmembers:int = 8, bitstringsize:int = 12, predefined:List[Member] = None) -> None:
         
         if predefined is None:
 
-            self.__population = []
-            self.__populationBitstringSize = bitstringsize
+            self.__population:List[Member] = []
+            self.__populationBitstringSize:int = bitstringsize
 
             for i in range(nmembers):
                 self.__population.append({
@@ -16,12 +17,12 @@ class Population:
                                         })
 
         else:
-            self.__population = predefined
-            self.__populationBitstringSize = len(predefined)
+            self.__population:List[Member] = predefined
+            self.__populationBitstringSize:int = len(predefined)
 
         pass
     
-    def get_population(self):
+    def get_population(self) -> List[Member]:
         return self.__population
     
     def get_population_bitstring_size(self) -> int:

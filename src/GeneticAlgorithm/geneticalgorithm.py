@@ -9,23 +9,23 @@ class GeneticAlgorithm:
                  mutation_probability:float = 0.02,
                  max_generations:int = 1000,
                  fitness_tolerance:int = 900,
-                 expected_value = None,
+                 expected_value:float = None,
                  maximize:bool = False) -> None:
         
         # FIXME - Implementar verificação dos parâmetros
-        self.__population = population
+        self.__population:Population = population
         self.__evaluator = evaluation_method
-        self.__cp = crossover_probability
-        self.__mp = mutation_probability
-        self.__mg = max_generations
-        self.__ftt = fitness_tolerance
-        self.__exv = expected_value
-        self.__maximize = maximize
+        self.__cp:float = crossover_probability
+        self.__mp:float = mutation_probability
+        self.__mg:int = max_generations
+        self.__ftt:int = fitness_tolerance
+        self.__exv:float= expected_value
+        self.__maximize:bool = maximize
 
         self.__fitness = None
         pass
     
-    def __evaluate_population_members(self):
+    def __evaluate_population_members(self) -> None:
         for m in self.__population.get_population():
            m["Fitness"] = self.__evaluator(m["Member"].get_bitstring())
 
@@ -45,7 +45,7 @@ class GeneticAlgorithm:
                 return True
         return False
 
-    def __calculate_population_degrees(self):
+    def __calculate_population_degrees(self) -> None:
 
         fitness_sum = 0
 
@@ -64,7 +64,7 @@ class GeneticAlgorithm:
             m_before = m
             
 
-    def __roullete_selection(self):
+    def __roullete_selection(self) -> list:
 
         selected_indexes = []
 
@@ -79,7 +79,7 @@ class GeneticAlgorithm:
 
         return selected_indexes
     
-    def __crossover(self, couples):
+    def __crossover(self, couples) -> None:
         
         population = self.__population.get_population()
         new_population_array = []
@@ -109,15 +109,15 @@ class GeneticAlgorithm:
 
         self.__population = Population(predefined=new_population_array)
 
-    def __mutate(self):
+    def __mutate(self) -> None:
         for m in self.__population.get_population():
             for i in range(len(m["Member"].get_bitstring())):
                 if np.random.random() < self.__mp:
                     m["Member"].mutate_at(i)
 
     def start(self) -> Member:
-        fitnessStrikes = 0 # Quantidade de gerações que não melhoraram o fitness value
-        generation = 1
+        fitnessStrikes:int = 0 # Quantidade de gerações que não melhoraram o fitness value
+        generation:int = 1
 
         self.__evaluate_population_members() # Avalia cada membro individualmente
 
@@ -162,6 +162,7 @@ class GeneticAlgorithm:
             # Soma 1 no contador de gerações
             generation += 1
         
+        # Resultados do processo
         if generation == self.__mg:
             print("Fim do processo: Máximo de gerações alcançado")
         elif fitnessStrikes == self.__ftt:

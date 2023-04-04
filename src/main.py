@@ -37,8 +37,8 @@ def g(value) -> float:
 # TODO - Depois fazer o resto das coisas, estou com preguiça, eu não aguento mais :D
 
 if __name__ == "__main__":
-    a = GeneticAlgorithm(Population(nmembers=1024), evaluator, expected_value=0, maximize=False).start()
-    img = a["Member"].get_bitstring()
-    img = img.reshape((4,3))
-    plt.imshow(img)
-    plt.show()
+    a = GeneticAlgorithm(Population(nmembers=1024), g, maximize=True).start()
+    #img = a["Member"].get_bitstring()
+    #img = img.reshape((4,3))
+    #plt.imshow(img)
+    #plt.show()
