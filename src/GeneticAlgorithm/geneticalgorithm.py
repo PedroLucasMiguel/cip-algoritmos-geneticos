@@ -15,7 +15,8 @@ class GeneticAlgorithm:
                  max_generations:int = 1000,
                  fitness_tolerance:int = 900,
                  expected_value:float = None,
-                 maximize:bool = False) -> None:
+                 maximize:bool = False,
+                 ui = None) -> None:
         
         # FIXME - Implementar verificação dos parâmetros
         self.__population:Population = population
@@ -26,6 +27,7 @@ class GeneticAlgorithm:
         self.__ftt:int = fitness_tolerance
         self.__exv:float= expected_value
         self.__maximize:bool = maximize
+        self.__ui = ui
 
         self.__fitness = None
         self.__fitness_memory:List[float] = []
@@ -35,6 +37,7 @@ class GeneticAlgorithm:
     def __evaluate_population_members(self) -> None:
         for m in self.__population.get_population():
            m["Fitness"] = self.__evaluator(m["Member"].get_bitstring())
+           self.__fitness_memory.append(m["Fitness"])
 
     # Avalia o desempenho médio da população
     def __evaluate_population(self) -> float:
@@ -141,14 +144,15 @@ class GeneticAlgorithm:
         converged = self.__check_convergence() if self.__exv is not None else False
 
         self.__fitness = self.__evaluate_population() # Define o valor médio de aptidão da população
-        self.__fitness_memory.append(self.__fitness)
+        #self.__fitness_memory.append(self.__fitness)
         # Execute o algoritmo enquanto:
         # - Não atingirmos o máximo de gerações
         # - Não passarmos do limite máximo de "strikes" no nosso valor de aptidão
         # - Não convergirmos na melhor resposta
         while generation != self.__mg and fitnessStrikes != self.__ftt and not converged:
-            if generation == 1 or generation % 100 == 0:
-                print("Doing gen {}".format(generation))
+            
+            if generation == 1 or generation % 10 == 0:
+                print("Processing generation: {}".format(generation))
                 
             self.__calculate_population_degrees()
 
@@ -167,7 +171,7 @@ class GeneticAlgorithm:
 
             # Verifica se a aptidão média da população melhorou ou não
             temp_fitness = self.__evaluate_population()
-            self.__fitness_memory.append(temp_fitness) # Salva a aptidão na "memória" dessa geração
+            #self.__fitness_memory.append(temp_fitness) # Salva a aptidão na "memória" dessa geração
 
             if self.__maximize:
                 if temp_fitness > self.__fitness:
@@ -182,14 +186,25 @@ class GeneticAlgorithm:
 
             # Soma 1 no contador de gerações
             generation += 1
+
+            self.__ui.progress_bar.setValue(np.round((generation*100)/self.__mg).astype(int))
         
         # Resultados do processo
         if generation == self.__mg:
-            print("Fim do processo: Máximo de gerações alcançado")
+            if self.__ui is not None:
+                self.__ui.text_output.appendPlainText("Fim do processo: Máximo de gerações alcançado")
+            else:
+                print("Fim do processo: Máximo de gerações alcançado")
         elif fitnessStrikes == self.__ftt:
-            print("Fim do processo: População parou de se tornar mais apta")
+            if self.__ui is not None:
+                self.__ui.text_output.appendPlainText("Fim do processo: População parou de se tornar mais apta")
+            else:
+                print("Fim do processo: População parou de se tornar mais apta")
         elif converged == True:
-            print("Fim do processo: Convergência alcançada!")
+            if self.__ui is not None:
+                self.__ui.text_output.appendPlainText("Fim do processo: Convergência alcançada!")
+            else:
+                print("Fim do processo: Convergência alcançada!")
 
         population = self.__population.get_population()
         best_member = population[0]
@@ -206,9 +221,14 @@ class GeneticAlgorithm:
                     best_fitness = m["Fitness"]
                     best_member = m
 
-        print("Geração: {}".format(generation))
-        print("Melhor Membro: {}".format(best_member))
-        print("Bitstring: {}".format(best_member["Member"].get_bitstring()))
+        if self.__ui is not None:
+            self.__ui.text_output.appendPlainText("Total de gerações: {}".format(generation))
+            self.__ui.text_output.appendPlainText("Melhor Membro: {}".format(best_member))
+            self.__ui.text_output.appendPlainText("Bitstring: {}".format(best_member["Member"].get_bitstring()))
+        else:
+            print("Total de gerações: {}".format(generation))
+            print("Melhor Membro: {}".format(best_member))
+            print("Bitstring: {}".format(best_member["Member"].get_bitstring()))
 
         return best_member
     
