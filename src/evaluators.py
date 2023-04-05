@@ -76,7 +76,7 @@ def ex3_evaluator(value) -> float:
 
         Considerando que a representação binária do número "10" é descrita como "1010", podemos
         perceber que se não fizermos nenhum tipo de tratamento, durante o processo de crossover e
-        mutação, podemos obter genes que ultrapassem o limite já pré-determinado.
+        mutação, podemos obter cromossommos que ultrapassem o limite já pré-determinado.
 
         Dessa forma, visando evitar uma grande quantidade de checagens e mudanças para contornar
         o problema do crossover, optei por construir a minha bitstring da seguinte forma:
