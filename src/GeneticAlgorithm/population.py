@@ -1,9 +1,14 @@
 from .member import Member
 from typing import List
 
+'''
+    Este arquivo contem o código relacionado a criação de uma população
+'''
+
 class Population:
     def __init__(self, nmembers:int = 8, bitstringsize:int = 12, predefined:List[Member] = None) -> None:
         
+        # Caso a população não tenha sido "construida" préviamente a instanciação, gere uma nova
         if predefined is None:
 
             self.__population:List[Member] = []
@@ -22,8 +27,10 @@ class Population:
 
         pass
     
+    # Retorna a população
     def get_population(self) -> List[Member]:
         return self.__population
     
+    # Retorna o tamanho da bitstring da população
     def get_population_bitstring_size(self) -> int:
         return self.__populationBitstringSize
