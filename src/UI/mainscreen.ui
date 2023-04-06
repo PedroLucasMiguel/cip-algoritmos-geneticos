@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>631</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,7 +106,7 @@
           <item>
            <widget class="QSpinBox" name="spin_population">
             <property name="minimum">
-             <number>1</number>
+             <number>2</number>
             </property>
             <property name="maximum">
              <number>3072</number>
@@ -233,7 +233,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Usar valor esperado de aptidão esperado</string>
+             <string>Usar valor de aptidão esperado</string>
             </property>
            </widget>
           </item>
@@ -247,6 +247,31 @@
          </layout>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="image_label">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: #FFFFFF</string>
+        </property>
+        <property name="text">
+         <string>Gráfico será gerado aqui</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
