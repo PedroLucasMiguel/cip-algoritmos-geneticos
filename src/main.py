@@ -1,10 +1,11 @@
-from PyQt6 import uic, QtWidgets
+from PyQt6 import uic, QtWidgets, QtGui
 from GeneticAlgorithm.geneticalgorithm import GeneticAlgorithm
 from GeneticAlgorithm.population import Population
 from matplotlib import pyplot as plt
 from evaluators import *
 from UI.AlertBox import AlertBox
 import time
+import os
 
 app = QtWidgets.QApplication([])
 interface = uic.loadUi("UI/mainscreen.ui")
@@ -42,7 +43,7 @@ def __start_button_clicked() -> None:
     
     if data is not None:
         if interface.radio_ex1.isChecked():
-            start = time.time()
+            graph_name = "Ex1_{}.png".format(time.time())
             ex = GeneticAlgorithm(
                     Population(nmembers=data["nmembers"], bitstringsize=12), 
                     evaluation_method=ex1_evaluator,
@@ -52,16 +53,19 @@ def __start_button_clicked() -> None:
                     fitness_tolerance=data["fitness_tolerance"],
                     maximize=data["maximize"], 
                     expected_value=data["ev"],
-                    ui=interface)
+                    ui=interface,
+                    graph_name=graph_name)
+            start = time.time()
             r = ex.start()
             end = time.time()
             img = r["Member"].get_bitstring()
             img = img.reshape((4,3))
+            time.sleep(0.2)
             plt.imshow(img)
             plt.show()
             
         elif interface.radio_ex2.isChecked():
-            start = time.time()
+            graph_name = "Ex2_{}.png".format(time.time())
             ex = GeneticAlgorithm(
                     Population(nmembers=data["nmembers"], bitstringsize=12), 
                     evaluation_method=ex2_evaluator,
@@ -71,12 +75,14 @@ def __start_button_clicked() -> None:
                     fitness_tolerance=data["fitness_tolerance"],
                     maximize=data["maximize"], 
                     expected_value=data["ev"],
-                    ui=interface)
+                    ui=interface,
+                    graph_name=graph_name)
+            start = time.time()
             r = ex.start()
             end = time.time()
 
         else:
-            start = time.time()
+            graph_name = "Ex3_{}.png".format(time.time())
             ex = GeneticAlgorithm(
                     Population(nmembers=data["nmembers"], bitstringsize=30), 
                     evaluation_method=ex3_evaluator,
@@ -86,10 +92,13 @@ def __start_button_clicked() -> None:
                     fitness_tolerance=data["fitness_tolerance"],
                     maximize=data["maximize"], 
                     expected_value=data["ev"],
-                    ui=interface)
+                    ui=interface,
+                    graph_name=graph_name)
+            start = time.time()
             r = ex.start()
             end = time.time()
 
+        interface.image_label.setPixmap(QtGui.QPixmap("output/{}".format(graph_name)))
         interface.text_output.appendPlainText("Aptidão minima, média e máxima alcançada: {}".format(ex.get_fitness_history()))
         duration = (end - start) 
         duration *= 1000
@@ -103,5 +112,10 @@ def show_ui() -> None:
 
 
 if __name__ == "__main__":
+    try:
+        os.mkdir("output")
+    except FileExistsError:
+        pass
+    
     show_ui()
     pass

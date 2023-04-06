@@ -1,6 +1,7 @@
 from .population import Population
 from .member import Member
 from typing import List
+from matplotlib import pyplot as plt
 import numpy as np
 
 '''
@@ -16,7 +17,8 @@ class GeneticAlgorithm:
                  fitness_tolerance:int = 900,
                  expected_value:float = None,
                  maximize:bool = False,
-                 ui = None) -> None:
+                 ui = None,
+                 graph_name:str = "result.png") -> None:
         
         # FIXME - Implementar verificação dos parâmetros
         self.__population:Population = population
@@ -28,16 +30,20 @@ class GeneticAlgorithm:
         self.__exv:float= expected_value
         self.__maximize:bool = maximize
         self.__ui = ui
+        self.__graph_name = graph_name
 
         self.__fitness = None
-        self.__fitness_memory:List[float] = []
+        #self.__fitness_memory:List[float] = []
+        self.__fitness_min_memory:List[float] = []
+        self.__fitness_max_memory:List[float] = []
+        self.__fitness_mean_memory:List[float] = []
         pass
     
     # Calcula a aptidão de cada membro individual da população
     def __evaluate_population_members(self) -> None:
         for m in self.__population.get_population():
            m["Fitness"] = self.__evaluator(m["Member"].get_bitstring())
-           self.__fitness_memory.append(m["Fitness"])
+           #self.__fitness_memory.append(m["Fitness"])
 
     # Avalia o desempenho médio da população
     def __evaluate_population(self) -> float:
@@ -166,12 +172,25 @@ class GeneticAlgorithm:
             # Avalia a aptidão de cada um individualmente
             self.__evaluate_population_members()
 
+            population = self.__population.get_population()
+            min_member_fitness = population[0]["Fitness"]
+            max_member_fitness = population[0]["Fitness"]
+
+            for i in range(1, len(population)):
+                if population[i]["Fitness"] < min_member_fitness:
+                    min_member_fitness = population[i]["Fitness"]
+                if population[i]["Fitness"] > max_member_fitness:
+                    max_member_fitness = population[i]["Fitness"]
+                
+            self.__fitness_min_memory.append(min_member_fitness)
+            self.__fitness_max_memory.append(max_member_fitness)
+
             # Checa convergência caso necessário
             converged = self.__check_convergence() if self.__exv is not None else False
 
             # Verifica se a aptidão média da população melhorou ou não
             temp_fitness = self.__evaluate_population()
-            #self.__fitness_memory.append(temp_fitness) # Salva a aptidão na "memória" dessa geração
+            self.__fitness_mean_memory.append(temp_fitness)
 
             if self.__maximize:
                 if temp_fitness > self.__fitness:
@@ -230,13 +249,19 @@ class GeneticAlgorithm:
             print("Melhor Membro: {}".format(best_member))
             print("Bitstring: {}".format(best_member["Member"].get_bitstring()))
 
+        x_axis = list(range(generation-1))
+        plt.plot(x_axis, self.__fitness_min_memory, label="Mínimo")
+        plt.plot(x_axis, self.__fitness_mean_memory, label="Médio")
+        plt.plot(x_axis, self.__fitness_max_memory, label="Máximo")
+        plt.xlabel("Gerações")
+        plt.ylabel("Valor de aptidão")
+        plt.title("Aptidão mínima/média/máxima para cada geração")
+        plt.legend()
+        plt.savefig("output/{}".format(self.__graph_name))
+        plt.cla()
+
         return best_member
     
     # Retorna todos os valores de aptidão colhidos pelo algoritmo
-    def get_fitness_history(self, mmm:bool = True):
-
-        # mmm = Min, Mean, Max
-        if mmm:
-            return (np.min(self.__fitness_memory), np.mean(self.__fitness_memory), np.max(self.__fitness_memory))
-
-        return self.__fitness_memory
+    def get_fitness_history(self):
+        return (np.min(self.__fitness_min_memory), np.mean(self.__fitness_mean_memory), np.max(self.__fitness_max_memory))
