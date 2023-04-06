@@ -29,6 +29,7 @@ class GeneticAlgorithm:
         self.__ftt:int = fitness_tolerance
         self.__exv:float= expected_value
         self.__maximize:bool = maximize
+        self.__roullete_max_degress:int = 360
         self.__ui = ui
         self.__graph_name = graph_name
 
@@ -43,7 +44,6 @@ class GeneticAlgorithm:
     def __evaluate_population_members(self) -> None:
         for m in self.__population.get_population():
            m["Fitness"] = self.__evaluator(m["Member"].get_bitstring())
-           #self.__fitness_memory.append(m["Fitness"])
 
     # Avalia o desempenho médio da população
     def __evaluate_population(self) -> float:
@@ -79,6 +79,10 @@ class GeneticAlgorithm:
                 m["RoulleteDegrees"] = (m_before["RoulleteDegrees"][-1] + 1, ((m_before["RoulleteDegrees"][-1] + 1) + np.floor((m["Fitness"] * 360)/fitness_sum).astype(int)) + 1)
             else:
                 m["RoulleteDegrees"] = (0, np.floor((m["Fitness"] * 360)/fitness_sum).astype(int)+1)
+            
+            if m["RoulleteDegrees"][1] > self.__roullete_max_degress:
+                self.__roullete_max_degress = m["RoulleteDegrees"][1]
+            
             m_before = m
             
 
@@ -91,7 +95,7 @@ class GeneticAlgorithm:
         population = self.__population.get_population()
 
         for i in range(len(population)):
-            rn = np.random.randint(low=1, high=361)
+            rn = np.random.randint(low=1, high=self.__roullete_max_degress+1)
             for m in range(len(population)):
                 if rn >= population[m]["RoulleteDegrees"][0] and rn <= population[m]["RoulleteDegrees"][1]: 
                     selected_indexes.append(m)
@@ -150,7 +154,6 @@ class GeneticAlgorithm:
         converged = self.__check_convergence() if self.__exv is not None else False
 
         self.__fitness = self.__evaluate_population() # Define o valor médio de aptidão da população
-        #self.__fitness_memory.append(self.__fitness)
         # Execute o algoritmo enquanto:
         # - Não atingirmos o máximo de gerações
         # - Não passarmos do limite máximo de "strikes" no nosso valor de aptidão
@@ -159,7 +162,10 @@ class GeneticAlgorithm:
             
             if generation == 1 or generation % 10 == 0:
                 print("Processing generation: {}".format(generation))
-                
+            
+            # Aqui definimos que o valor máximo "padrão" é 360°
+            # Porém, dependendo do tamanho da população, esse valor pode ser bem superior
+            self.__roullete_max_degress = 360 
             self.__calculate_population_degrees()
 
             # Seleção
