@@ -19,7 +19,7 @@ def ex1_evaluator(value) -> float:
     # Validação de tamanho para a bitstring, pois
     # caso ela não tenha um tamanho EXATAMENTE igual a 12, não podemos usar essa função
     if len(value) != 12:
-        raise InvalidBitStringSize("A Bitstring of size 12 is expected to be provied to this evaluator")
+        raise InvalidBitStringSize("A Bitstring of size 12 is expected to be provied to this evaluator {}".format(len(value)))
 
     # Padrão do "0"
     expected = np.array([

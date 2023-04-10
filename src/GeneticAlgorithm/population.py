@@ -23,7 +23,7 @@ class Population:
 
         else:
             self.__population:List[Member] = predefined
-            self.__populationBitstringSize:int = len(predefined)
+            self.__populationBitstringSize:int = len(predefined[0]["Member"].get_bitstring())
 
         pass
     
