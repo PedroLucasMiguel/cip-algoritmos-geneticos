@@ -10,6 +10,7 @@ import os
 app = QtWidgets.QApplication([])
 interface = uic.loadUi("UI/mainscreen.ui")
 
+# Recolhe os dados fornecidos na interface
 def get_data() -> dict:
     data = {}
     data["nmembers"] = interface.spin_population.value()
@@ -29,6 +30,7 @@ def get_data() -> dict:
 
     return data
 
+# Função responsável em habilitar (ou não) o campo de valor esperado
 def __enable_expected_value() -> None:
     if interface.check_use_ev.isChecked():
         interface.spin_ev.setEnabled(True)
@@ -57,11 +59,11 @@ def __start_button_clicked() -> None:
                     graph_name=graph_name)
             r = ex.start()
             fitness = ex1_evaluator(r["Member"].get_bitstring())
-            #img = r["Member"].get_bitstring()
-            #img = img.reshape((4,3))
-            #time.sleep(0.2)
-            #plt.imshow(img)
-            #plt.show()
+            img = r["Member"].get_bitstring()
+            img = img.reshape((4,3))
+            time.sleep(0.3)
+            plt.imshow(img)
+            plt.show()
             
         elif interface.radio_ex2.isChecked():
             graph_name = "Ex2_{}".format(time.time())
@@ -96,7 +98,8 @@ def __start_button_clicked() -> None:
                     graph_name=graph_name)
             r = ex.start()
             fitness = ex3_evaluator(r["Member"].get_bitstring())
-
+        
+        # Apresentando os resultados finais da execução
         interface.image_label.setPixmap(QtGui.QPixmap("output/{}_final.png".format(graph_name)))
         interface.text_output.appendPlainText("\n{}Resultados finais{}".format("-"*20, "-"*20))
         interface.text_output.appendPlainText("Média de gerações: {}".format(ex.get_mean_generations()))
@@ -114,7 +117,6 @@ def show_ui() -> None:
     interface.check_use_ev.clicked.connect(__enable_expected_value)
     interface.show()
     app.exec()
-
 
 if __name__ == "__main__":
     try:
