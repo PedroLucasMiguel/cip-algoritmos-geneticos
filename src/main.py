@@ -58,7 +58,7 @@ def __start_button_clicked() -> None:
                     ui=interface,
                     graph_name=graph_name)
             r = ex.start()
-            fitness = ex1_evaluator(r["Member"].get_bitstring())
+            #fitness = ex1_evaluator(r["Member"].get_bitstring())
             img = r["Member"].get_bitstring()
             img = img.reshape((4,3))
             time.sleep(0.3)
@@ -80,7 +80,7 @@ def __start_button_clicked() -> None:
                     ui=interface,
                     graph_name=graph_name)
             r = ex.start()
-            fitness = ex2_evaluator(r["Member"].get_bitstring())
+            #fitness = ex2_evaluator(r["Member"].get_bitstring())
 
         else:
             graph_name = "Ex3_{}".format(time.time())
@@ -97,7 +97,7 @@ def __start_button_clicked() -> None:
                     ui=interface,
                     graph_name=graph_name)
             r = ex.start()
-            fitness = ex3_evaluator(r["Member"].get_bitstring())
+            #fitness = ex3_evaluator(r["Member"].get_bitstring())
         
         # Apresentando os resultados finais da execução
         interface.image_label.setPixmap(QtGui.QPixmap("output/{}_final.png".format(graph_name)))
@@ -108,7 +108,7 @@ def __start_button_clicked() -> None:
         interface.text_output.appendPlainText("Valor de aptidão médio: {} | std: {}".format(fh[1][0], fh[1][1]))
         interface.text_output.appendPlainText("Valor de aptidão máximo: {} | std: {}".format(fh[2][0], fh[2][1]))
         interface.text_output.appendPlainText("Melhor membro: {}".format(r))
-        interface.text_output.appendPlainText("Fitness: {}".format(fitness))
+        #interface.text_output.appendPlainText("Fitness: {}".format(fitness))
         interface.text_output.appendPlainText("Bitstring: {}".format(r["Member"].get_bitstring()))
         interface.text_output.appendPlainText("Tempo de execução médio (s): {}".format(ex.get_execution_time()))  
     
