@@ -3,9 +3,12 @@ from GeneticAlgorithm.geneticalgorithm import GeneticAlgorithm
 from GeneticAlgorithm.population import Population
 from matplotlib import pyplot as plt
 from evaluators import *
-from UI.AlertBox import AlertBox
 import time
 import os
+
+'''
+    Este arquivo é responsável pela execução da GUI do programa.
+'''
 
 app = QtWidgets.QApplication([])
 interface = uic.loadUi("UI/mainscreen.ui")
@@ -37,6 +40,7 @@ def __enable_expected_value() -> None:
     else:
         interface.spin_ev.setEnabled(False)
 
+# Função responsável por iniciar o algoritmo selecionado dado os dados de entrada
 def __start_button_clicked() -> None:
     interface.text_output.clear()
     interface.progress_bar.setValue(int(0))
@@ -58,7 +62,6 @@ def __start_button_clicked() -> None:
                     ui=interface,
                     graph_name=graph_name)
             r = ex.start()
-            #fitness = ex1_evaluator(r["Member"].get_bitstring())
             img = r["Member"].get_bitstring()
             img = img.reshape((4,3))
             time.sleep(0.3)
@@ -80,7 +83,6 @@ def __start_button_clicked() -> None:
                     ui=interface,
                     graph_name=graph_name)
             r = ex.start()
-            #fitness = ex2_evaluator(r["Member"].get_bitstring())
 
         else:
             graph_name = "Ex3_{}".format(time.time())
@@ -97,7 +99,6 @@ def __start_button_clicked() -> None:
                     ui=interface,
                     graph_name=graph_name)
             r = ex.start()
-            #fitness = ex3_evaluator(r["Member"].get_bitstring())
         
         # Apresentando os resultados finais da execução
         interface.image_label.setPixmap(QtGui.QPixmap("output/{}_final.png".format(graph_name)))
@@ -108,7 +109,6 @@ def __start_button_clicked() -> None:
         interface.text_output.appendPlainText("Valor de aptidão médio: {} | std: {}".format(fh[1][0], fh[1][1]))
         interface.text_output.appendPlainText("Valor de aptidão máximo: {} | std: {}".format(fh[2][0], fh[2][1]))
         interface.text_output.appendPlainText("Melhor membro: {}".format(r))
-        #interface.text_output.appendPlainText("Fitness: {}".format(fitness))
         interface.text_output.appendPlainText("Bitstring: {}".format(r["Member"].get_bitstring()))
         interface.text_output.appendPlainText("Tempo de execução médio (s): {}".format(ex.get_execution_time()))  
     
@@ -118,8 +118,10 @@ def show_ui() -> None:
     interface.show()
     app.exec()
 
+# Executa a aplicação quanto o aplicativo é executado pelo comando "python"
 if __name__ == "__main__":
     try:
+        # Cria o diretório onde os gráficos são salvos caso ele não exista
         os.mkdir("output")
     except FileExistsError:
         pass
